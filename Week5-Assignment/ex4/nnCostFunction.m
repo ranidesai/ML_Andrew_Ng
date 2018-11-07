@@ -63,6 +63,54 @@ Theta2_grad = zeros(size(Theta2));
 %
 
 
+%%% Input Layer
+X = [ones(m, 1) X];
+a1 = X;
+
+%%% Hidden Layer
+z2 = a1 * Theta1';
+a2 = sigmoid(z2);
+
+%%% Output Layer
+a2 = [ones(m, 1) a2];
+z3 = a2 * Theta2';
+a3 = sigmoid(z3);
+
+hypothesis = a3;
+
+%%% Transform y into Binary Vector of class K values
+
+I = eye(num_labels);
+Y = zeros(m, num_labels);
+for i=1:m
+  Y(i, :)= I(y(i), :);
+end
+
+%%% Compute cost without regularization
+J = (1/m) * sum(sum( (-Y .* log(hypothesis)) - (1-Y) .* log(1-hypothesis)));
+
+%%% Compute backpropagation algorithm
+
+Sigma3 = hypothesis - Y;
+Sigma2 = (Sigma3 * Theta2) .* sigmoidGradient([ones(size(z2, 1), 1) z2]);
+Sigma2 = Sigma2(:, 2:end);
+
+Delta1 = Sigma2' * a1;
+Delta2 = Sigma3' * a2;
+
+%%% Compute Unregularized gradient
+
+Theta1_grad = 1/m * Delta1;
+Theta2_grad = 1/m * Delta2;
+
+%%% Compute Regularized gradient
+
+Theta1_grad = 1/m * Delta1 + ((lambda/m) * [zeros(size(Theta1, 1), 1) Theta1(:, 2:end)]);
+Theta2_grad = 1/m * Delta2 + ((lambda/m) * [zeros(size(Theta2, 1), 1) Theta2(:, 2:end)]);
+
+%%% Compute Regularized cost
+Reg = (lambda/(2*m)) * ( sum(sum(Theta1(:, 2:end) .^ 2)) + sum(sum(Theta2(:, 2:end) .^ 2)) );
+J = J + Reg;
 
 
 
